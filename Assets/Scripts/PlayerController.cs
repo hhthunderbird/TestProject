@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -17,6 +18,8 @@ public class PlayerController : MonoBehaviour
 
 
     private Vector2 _startTouchPosition;
+
+    public static event Action OnCollision;
 
     protected void OnEnable()
     {
@@ -76,7 +79,7 @@ public class PlayerController : MonoBehaviour
         if(other.CompareTag( "obstacle" ) )
         {
             Debug.Log( "Player hit an obstacle!" );
-            // Handle collision with obstacle
+            OnCollision?.Invoke();
         }
     }
 }

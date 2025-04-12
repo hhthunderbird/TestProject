@@ -1,6 +1,9 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Treadmill : MonoBehaviour
 {
@@ -29,6 +32,13 @@ public class Treadmill : MonoBehaviour
     [SerializeField] private float _obstacleBaseHeight = 1.5f;
     [SerializeField] private float _obstaclePlacementCurvature = 0.02f;
 
+    [SerializeField] private float _score;
+
+    [SerializeField] private TMP_Text _textScore;
+
+    [SerializeField] private GameObject _gameOverScreen;
+    [SerializeField] private Button _restartButton;
+
 
     private void Awake()
     {
@@ -42,9 +52,12 @@ public class Treadmill : MonoBehaviour
 
     void Start()
     {
+        PlayerController.OnCollision += OnPlayerCollision;
+        _restartButton.onClick.AddListener( OnRestartButton );
+
         _obstaclePlacingTimeEvo = _obstaclePlacingTime / 200f;
 
-        _speedEvo = _speed / 200f;
+        _speedEvo = _speed / 100f;
 
         _pieces = new ScenarioBlock[ _quantity ];
 
@@ -60,8 +73,31 @@ public class Treadmill : MonoBehaviour
         _pieceLength = Mathf.Abs( _pieceLength );
     }
 
+    private void OnRestartButton()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene( SceneManager.GetActiveScene().name );
+    }
+
+    private void OnPlayerCollision()
+    {
+        _speedEvo *= 1.2f;
+        _obstaclePlacingTimeEvo *= 1.2f;
+        _score -= 10;
+        if ( _score < 0 )
+        {
+            Time.timeScale = 0;
+            _gameOverScreen.SetActive( true );
+        }
+    }
+
+
+
     void Update()
     {
+        _score += Time.deltaTime;
+        _textScore.text = ( ( int ) _score ).ToString();
+
         if ( _pieces.Length < 1 ) return;
 
         if ( _speedEvoTimeCounter < _speedEvoTime )
